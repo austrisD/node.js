@@ -94,5 +94,5 @@ handlers.notFound = (data, callback) => {
 
 //define a request routers
 const router = {
-  sample: handlers.sample,
+  'sample': handlers.sample,
 };
