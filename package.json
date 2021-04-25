@@ -1,0 +1,19 @@
+{
+  "name": "node",
+  "version": "1.0.0",
+  "description": "Learns node",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "test": "run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "none"
+  },
+  "keywords": [
+    "node.js"
+  ],
+  "author": "Austris Daugulis",
+  "license": "UNLICENSED"
+}
