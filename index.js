@@ -1,10 +1,54 @@
 /* server start*/
 
 const http = require("http");
-const url = require("url");
-const stringDecoder = require("string_decoder").StringDecoder;
+const https = require("https");
 
-const server = http.createServer((req, res) => {
+const url = require("url");
+const { StringDecoder } = require("string_decoder");
+const config = require("./config");
+const fs = require("fs");
+// const _data = require("./lib/data");
+
+//test delete
+// _data.create("test", "newFile", { 'foo': "bar" }, (err) => {
+//   console.log("error", err);
+// });
+// _data.read("test", "newFile", (err, date) => {
+//   console.log("error", err, "date", date);
+// });
+// _data.update("test", "newFile", { 'foo': "buzz" }, (err) => {
+//   console.log("error", err);
+// });
+// _data.delete("test", "newFile", (err) => {
+//   console.log("error", err);
+// });
+
+
+const httpServer = http.createServer((req, res) => {
+  UnifiedServer(req, res);
+});
+httpServer.listen(config.httpPort, () => {
+  console.log(
+    `server is listening on port ${config.httpPort} in ${config.envName} mode`
+  );
+});
+
+//HTTPS
+const httpsServerOptions = {
+  key: fs.readFileSync("./https/key.pem"),
+  cert: fs.readFileSync("./https/cert.pem"),
+};
+const httpsServer = https.createServer(httpsServerOptions, (req, res) => {
+  UnifiedServer(req, res);
+});
+
+httpsServer.listen(config.httpsPort, () => {
+  console.log(
+    `server is listening on port ${config.httpsPort} in ${config.envName} mode`
+  );
+});
+
+const UnifiedServer = (req, res) => {
   //  get the url
   const parseUrl = url.parse(req.url, true);
 
@@ -22,7 +66,7 @@ const server = http.createServer((req, res) => {
   const headers = req.headers;
 
   // get a payload if there is any
-  const decoder = new stringDecoder("utf-8");
+  const decoder = new StringDecoder("utf8");
   let buffer = "";
   req.on("data", (data) => {
     buffer += decoder.write(data);
@@ -48,22 +92,22 @@ const server = http.createServer((req, res) => {
     // route request to handler
     chosenHandler(data, (statusCode, payload) => {
       //use status code callback 200
-      statusCode = typeof(statusCode)  == "number" ? statusCode : 200;
+      statusCode = typeof statusCode == "number" ? statusCode : 200;
 
       //some text
-      payload = typeof(payload) == "object" ? payload : {};
+      payload = typeof payload == "object" ? payload : {};
 
       //convert to string
       const payloadString = JSON.stringify(payload);
 
-      //  send a response
+      //  Return a response
+      res.setHeader("Content-type", "application/json");
       res.writeHead(statusCode);
       res.end(payloadString);
 
       // log the response
       console.log("retuning this response:", statusCode, payloadString);
     });
-
   });
 
   console.log(`Request received on path:${trimmedPath} `);
@@ -72,19 +116,15 @@ const server = http.createServer((req, res) => {
     `and with those query parameters:` + JSON.stringify(queryStringObject)
   );
   console.log(`Request received width these headers:`, headers);
-});
-
-server.listen(3000, () => {
-  console.log("server is listening on port 3000");
-});
+};
 
 //define the handlers
 const handlers = {};
 
 //sample handler
-handlers.sample = (data, callback) => {
+handlers.ping = (data, callback) => {
   //callback ....
-  callback(406, { name: "sample handlers" });
+  callback(200);
 };
 
 //not fond handler
@@ -94,5 +134,5 @@ handlers.notFound = (data, callback) => {
 
 //define a request routers
 const router = {
-  'sample': handlers.sample,
+  'ping': handlers.ping,
 };
