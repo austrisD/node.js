@@ -1,8 +1,7 @@
 /* server start*/
 
 const http = require("http");
-const https = require("https");
-
+const https = require('https');
 const url = require("url");
 const { StringDecoder } = require("string_decoder");
 const config = require("./lib/config");
@@ -25,6 +24,8 @@ const helpers = require("./lib/helpers");
 //   console.log("error", err);
 // });
 
+
+//HTTP server
 const httpServer = http.createServer((req, res) => {
   UnifiedServer(req, res);
 });
@@ -36,14 +37,12 @@ httpServer.listen(config.httpPort, () => {
 
 //HTTPS
 const httpsServerOptions = {
-  key: fs.readFileSync("./https/key.pem"),
-  cert: fs.readFileSync("./https/cert.pem"),
+  "key": fs.readFileSync("./https/key.pem"),
+  "cert": fs.readFileSync("./https/cert.pem"),
 };
-const httpsServer = https.createServer(httpsServerOptions, (req, res) => {
+https.createServer(httpsServerOptions, (req, res) => {
   UnifiedServer(req, res);
-});
-
-httpsServer.listen(config.httpsPort, () => {
+}).listen(config.httpsPort, () => {
   console.log(
     `server is listening on port ${config.httpsPort} in ${config.envName} mode`
   );
